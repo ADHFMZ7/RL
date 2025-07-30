@@ -16,6 +16,6 @@ def create_pruned_cartpole():
     # Create a wrapper environment that removes the pole data from the observation space
     return TransformObservation(base_env, lambda obs: obs[:2], pruned_space)
 
-def create_stacked_cartpole():
-    return FrameStackObservation(create_pruned_cartpole(), 4)
+def create_stacked_cartpole(num_frames: int = 4):
+    return FrameStackObservation(create_pruned_cartpole(), num_frames)
 
