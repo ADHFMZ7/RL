@@ -50,8 +50,8 @@ loggers = Logger(
 params = {
     "learning_rate": 1e-4,
     "gamma": 0.98,
-    "n_steps": 8192,
-    "batch_size": 1024,
+    "n_steps": 16384,
+    "batch_size": 2048,
     "ent_coef": 0.05,
     "n_epochs": 30,
     "normalize_advantage": True,
@@ -60,8 +60,8 @@ params = {
     'gae_lambda': 0.95,
     'device': 'cuda',
     "policy_kwargs": {
-        "net_arch": [256, 256],
-        "lstm_hidden_size": 256,
+        "net_arch": [512, 512],
+        "lstm_hidden_size": 512,
         "n_lstm_layers": 2,
         "shared_lstm": False,
         "enable_critic_lstm": True,
@@ -90,7 +90,7 @@ with mlflow.start_run():
                 verbose=1,
                 **params
             )
-
+    
     # model = PPO("MlpPolicy",
     #             env, 
     #             verbose=1,
