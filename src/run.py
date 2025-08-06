@@ -50,10 +50,10 @@ class Run:
 
             # Set custom logger
             model.set_logger(self.loggers)
-            model.learn(total_timesteps=10000, log_interval=1)
+            model.learn(total_timesteps=300000, log_interval=1)
 
             # Evaluate the model after training
-            eval_env = make_stacked_cartpole(n_envs=1, num_frames=6)
+            eval_env = make_stacked_cartpole(n_envs=8, num_frames=6)
             mean_reward, std_reward = evaluate_policy(
                 model,
                 env,
