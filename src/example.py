@@ -1,7 +1,7 @@
 import os
 import torch
 from stable_baselines3.common.torch_layers import FlattenExtractor
-from stable_baselines3 import PPO
+# from stable_baselines3 import PPO
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.ppo_recurrent.policies import MlpLstmPolicy
 
@@ -27,7 +27,7 @@ def main():
     #     "num_stacked": 6
     # }
 
-    params = {'learning_rate': 0.000400221439537741, 'n_steps': 512, 'gamma': 0.9757367668177018, 'gae_lambda': 0.8745117955609628, 'ent_coef': 0.0010093238389732085, 'vf_coef': 0.1845885889475887, 'max_grad_norm': 0.6961241873745438, 'clip_range': 0.127594201231583, "policy_kwargs": {"net_arch": [512, 512, 512]}}
+    # params = {'learning_rate': 0.000400221439537741, 'n_steps': 512, 'gamma': 0.9757367668177018, 'gae_lambda': 0.8745117955609628, 'ent_coef': 0.0010093238389732085, 'vf_coef': 0.1845885889475887, 'max_grad_norm': 0.6961241873745438, 'clip_range': 0.127594201231583, "policy_kwargs": {"net_arch": [512, 512, 512]}}
 
     # params = {
     #     "learning_rate": 2.38e-5,
@@ -42,31 +42,29 @@ def main():
     #     "policy_kwargs": {"net_arch": [512, 512, 512]}
     # }
 
-    # params = {
-    #     "learning_rate": 1e-4,
-    #     "gamma": 0.98,
-    #     "n_steps": 2048,
-    #     "batch_size": 512,
-    #     "ent_coef": 0.05,
-    #     "n_epochs": 30,
-    #     "normalize_advantage": True,
-    #     "max_grad_norm": 0.5,
-    #     "vf_coef": 0.7,
-    #     "gae_lambda": 0.95,
-    #     "device": "cuda",
-    #     "policy_kwargs": {
-    #         "net_arch": [512, 512],
-    #         "lstm_hidden_size": 512,
-    #         "n_lstm_layers": 2,
-    #         "shared_lstm": False,
-    #         "enable_critic_lstm": True,
-    #         "activation_fn": torch.nn.Tanh,
-    #         "ortho_init": True,
-    #         "normalize_images": False,
-    #         "features_extractor_class": FlattenExtractor,
-    #     },
-    #     "num_stacked": 6,
-    # }
+    params = {
+        "learning_rate": 1e-4,
+        "gamma": 0.9757367668177018,
+        "n_steps": 2048,
+        "ent_coef": 0.001,
+        "n_epochs": 30,
+        "normalize_advantage": True,
+        "max_grad_norm": 0.6961,
+        "vf_coef": 0.1845,
+        "gae_lambda": 0.8745,
+        "device": "cuda",
+        "policy_kwargs": {
+            "net_arch": [512, 512],
+            "lstm_hidden_size": 512,
+            "n_lstm_layers": 2,
+            "shared_lstm": False,
+            "enable_critic_lstm": True,
+            "activation_fn": torch.nn.Tanh,
+            "ortho_init": True,
+            "normalize_images": False,
+            "features_extractor_class": FlattenExtractor,
+        },
+    }
 
     # params = {
     #     "learning_rate": 1e-4,
@@ -95,8 +93,8 @@ def main():
     # }
 
     # del params["num_stacked"]
-    # model = RecurrentPPO(MlpLstmPolicy, env, verbose=1, **params)
-    model = PPO("MlpPolicy", env, verbose=1, **params)
+    model = RecurrentPPO(MlpLstmPolicy, env, verbose=1, **params)
+    # model = PPO("MlpPolicy", env, verbose=1, **params)
 
 
     new_run = Run(env, model, params, url, "test")
