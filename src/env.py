@@ -1,9 +1,11 @@
 import numpy as np
 import gymnasium as gym
-from gymnasium.wrappers import TransformObservation 
-from gymnasium.wrappers import FrameStackObservation
-
 from gymnasium.spaces import Box
+from gymnasium.wrappers import TransformObservation 
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import VecFrameStack
+from stable_baselines3.common.monitor import Monitor
+
 
 def create_pruned_cartpole():
     
@@ -14,8 +16,10 @@ def create_pruned_cartpole():
     pruned_space = Box(low=low, high=high, dtype=np.float32)
 
     # Create a wrapper environment that removes the pole data from the observation space
-    return TransformObservation(base_env, lambda obs: obs[:2], pruned_space)
+    return Monitor(TransformObservation(base_env, lambda obs: obs[:2], pruned_space))
 
-def create_stacked_cartpole(num_frames: int = 4):
-    return FrameStackObservation(create_pruned_cartpole(), num_frames)
-
+def make_stacked_cartpole(n_envs=1, num_frames=4):
+    env_fn = lambda: create_pruned_cartpole()
+    vec_env = make_vec_env(env_fn, n_envs=n_envs)
+    stacked_env = VecFrameStack(vec_env, n_stack=num_frames)
+    return stacked_env

@@ -11,24 +11,19 @@ from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from log import MLflowOutputFormat
-from env import create_stacked_cartpole
-
-# Monkey patch gym.__version__
-# import gym as gym_shim
-#
-# gym_shim.__version__ = gym.__version__
+from env import make_stacked_cartpole
 
 
 class Run:
     def __init__(
-        self, env: Env, model: BaseAlgorithm, params: dict, url: str, exp_name: str
+        self, env, model: BaseAlgorithm, params: dict, url: str, exp_name: str
     ):
         self.loggers = Logger(
             folder=None,
             output_formats=[HumanOutputFormat(sys.stdout), MLflowOutputFormat()],
         )
 
-        self.env = Monitor(env)
+        self.env = env
 
         self.params = params
         self.model = model
@@ -58,7 +53,7 @@ class Run:
             model.learn(total_timesteps=10000, log_interval=1)
 
             # Evaluate the model after training
-            eval_env = create_stacked_cartpole()
+            eval_env = make_stacked_cartpole(n_envs=1, num_frames=6)
             mean_reward, std_reward = evaluate_policy(
                 model,
                 env,
@@ -71,5 +66,5 @@ class Run:
             mlflow.log_metric("mean_reward", mean_reward)
             mlflow.log_metric("std_reward", std_reward)
 
-            # model.save("model.zip")
+            model.save("model.zip")
             mlflow.log_artifact("model.zip")
