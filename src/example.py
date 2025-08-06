@@ -42,16 +42,40 @@ def main():
     #     "policy_kwargs": {"net_arch": [512, 512, 512]}
     # }
 
+    # params = {
+    #     "learning_rate": 1e-4,
+    #     "gamma": 0.9757367668177018,
+    #     "n_steps": 2048,
+    #     "ent_coef": 0.001,
+    #     "n_epochs": 30,
+    #     "normalize_advantage": True,
+    #     "max_grad_norm": 0.6961,
+    #     "vf_coef": 0.1845,
+    #     "gae_lambda": 0.8745,
+    #     "device": "cuda",
+    #     "policy_kwargs": {
+    #         "net_arch": [512, 512],
+    #         "lstm_hidden_size": 512,
+    #         "n_lstm_layers": 2,
+    #         "shared_lstm": False,
+    #         "enable_critic_lstm": True,
+    #         "activation_fn": torch.nn.Tanh,
+    #         "ortho_init": True,
+    #         "normalize_images": False,
+    #         "features_extractor_class": FlattenExtractor,
+    #     },
+    #     'batch_size': 8 * 2048
+    # }
+
     params = {
-        "learning_rate": 1e-4,
-        "gamma": 0.9757367668177018,
-        "n_steps": 2048,
-        "ent_coef": 0.001,
-        "n_epochs": 30,
-        "normalize_advantage": True,
-        "max_grad_norm": 0.6961,
-        "vf_coef": 0.1845,
-        "gae_lambda": 0.8745,
+        'learning_rate': 0.000328323884080817,
+        'n_steps': 128,
+        'gamma': 0.9636242163718899,
+        'gae_lambda': 0.888288034714926,
+        'ent_coef': 0.020963306906827742,
+        'vf_coef': 0.24336227091003873,
+        'max_grad_norm': 0.5176571493287323,
+        'clip_range':0.24239374366478478,
         "device": "cuda",
         "policy_kwargs": {
             "net_arch": [512, 512],
@@ -65,7 +89,7 @@ def main():
             "features_extractor_class": FlattenExtractor,
         },
         'batch_size': 8 * 2048
-    }
+     }
 
     # params = {
     #     "learning_rate": 1e-4,
