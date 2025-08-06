@@ -1,7 +1,5 @@
-import gym
 import torch
 import optuna
-import numpy as np
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -12,9 +10,9 @@ from env import make_stacked_cartpole
 def objective(trial: optuna.Trial) -> float:
     env = make_stacked_cartpole(n_envs=8, num_frames=6)
 
-    # 🧪 Sample hyperparameters
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-5, 1e-3)
-    n_steps = trial.suggest_categorical("n_steps", [64, 128, 256, 512, 1024])
+    # Sample hyperparameters
+    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
+    n_steps = trial.suggest_categorical("n_steps", [128, 256, 512, 1024, 2048])
     gamma = trial.suggest_float("gamma", 0.9, 0.999)
     gae_lambda = trial.suggest_float("gae_lambda", 0.8, 0.99)
     ent_coef = trial.suggest_float("ent_coef", 0.0, 0.1)
@@ -24,8 +22,9 @@ def objective(trial: optuna.Trial) -> float:
 
     policy_kwargs = dict(
         activation_fn=torch.nn.ReLU,
-        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
+        net_arch=dict(pi=[512, 512, 512], vf=[512, 512, 512])
     )
+
 
     model = PPO(
         policy="MlpPolicy",
@@ -40,12 +39,12 @@ def objective(trial: optuna.Trial) -> float:
         clip_range=clip_range,
         verbose=0,
         policy_kwargs=policy_kwargs,
-        device='cuda'
+        device='cuda',
+        batch_size=8*n_steps
     )
 
-    model.learn(total_timesteps=50_000)
+    model.learn(total_timesteps=200_000)
 
-    # 🧪 Evaluate
     eval_env = make_stacked_cartpole(n_envs=8, num_frames=6)
     mean_reward, _ = evaluate_policy(model, eval_env, n_eval_episodes=10, deterministic=True)
 
