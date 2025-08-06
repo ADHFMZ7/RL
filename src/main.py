@@ -20,18 +20,8 @@ from log import MLflowOutputFormat
 
 # Monkey patch gym.__version__
 import gym as gym_shim
+
 gym_shim.__version__ = gym.__version__
-
-torch.set_float32_matmul_precision('high')
-
-mlflow.set_experiment('CartPoleStackedRecurrent')
-mlflow.set_tracking_uri('http://localhost:8080')
-
-
-loggers = Logger(
-    folder=None,
-    output_formats=[HumanOutputFormat(sys.stdout), MLflowOutputFormat()],
-)
 
 # Hyperparameters
 
@@ -57,8 +47,8 @@ params = {
     "normalize_advantage": True,
     "max_grad_norm": 0.5,
     "vf_coef": 0.7,
-    'gae_lambda': 0.95,
-    'device': 'cuda',
+    "gae_lambda": 0.95,
+    "device": "cuda",
     "policy_kwargs": {
         "net_arch": [512, 512],
         "lstm_hidden_size": 512,
@@ -68,15 +58,27 @@ params = {
         "activation_fn": torch.nn.Tanh,
         "ortho_init": True,
         "normalize_images": False,
-        "features_extractor_class": FlattenExtractor
+        "features_extractor_class": FlattenExtractor,
     },
-    "num_stacked": 6
+    "num_stacked": 6,
 }
+
+if params["device"] == "cuda":
+    torch.set_float32_matmul_precision("high")
+
+mlflow.set_experiment("CartPoleStackedRecurrent")
+mlflow.set_tracking_uri()
+
+
+loggers = Logger(
+    folder=None,
+    output_formats=[HumanOutputFormat(sys.stdout), MLflowOutputFormat()],
+)
 
 
 # env = gym.make('CartPole-v1')
-env = create_stacked_cartpole(params['num_stacked'])
-del params['num_stacked']
+env = create_stacked_cartpole(params["num_stacked"])
+del params["num_stacked"]
 
 # Wrap env in monitor for logging
 env = Monitor(env)
@@ -85,14 +87,10 @@ env = Monitor(env)
 with mlflow.start_run():
     mlflow.log_params(params)
 
-    model = RecurrentPPO(MlpLstmPolicy,
-                env, 
-                verbose=1,
-                **params
-            )
-    
+    model = RecurrentPPO(MlpLstmPolicy, env, verbose=1, **params)
+
     # model = PPO("MlpPolicy",
-    #             env, 
+    #             env,
     #             verbose=1,
     #             **params
     #         )
@@ -102,7 +100,9 @@ with mlflow.start_run():
     model.learn(total_timesteps=300000, log_interval=1)
 
     # Evaluate the model after training
-    mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, return_episode_rewards=False)
+    mean_reward, std_reward = evaluate_policy(
+        model, env, n_eval_episodes=10, return_episode_rewards=False
+    )
 
     # Log evaluation metrics
     mlflow.log_metric("mean_reward", mean_reward)
