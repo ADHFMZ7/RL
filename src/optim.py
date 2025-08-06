@@ -4,6 +4,10 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.torch_layers import FlattenExtractor
+from sb3_contrib import RecurrentPPO
+from sb3_contrib.ppo_recurrent.policies import MlpLstmPolicy
+
 
 from env import make_stacked_cartpole
 
@@ -20,14 +24,26 @@ def objective(trial: optuna.Trial) -> float:
     max_grad_norm = trial.suggest_float("max_grad_norm", 0.3, 1.0)
     clip_range = trial.suggest_float("clip_range", 0.1, 0.3)
 
-    policy_kwargs = dict(
-        activation_fn=torch.nn.ReLU,
-        net_arch=dict(pi=[512, 512, 512], vf=[512, 512, 512])
-    )
+    # policy_kwargs = dict(
+    #     activation_fn=torch.nn.ReLU,
+    #     net_arch=dict(pi=[512, 512, 512], vf=[512, 512, 512])
+    # )
+
+    policy_kwargs = {
+            "net_arch": [512, 512],
+            "lstm_hidden_size": 512,
+            "n_lstm_layers": 2,
+            "shared_lstm": False,
+            "enable_critic_lstm": True,
+            "activation_fn": torch.nn.Tanh,
+            "ortho_init": True,
+            "normalize_images": False,
+            "features_extractor_class": FlattenExtractor,
+        }
 
 
-    model = PPO(
-        policy="MlpPolicy",
+    model = RecurrentPPO(
+        policy=MlpLstmPolicy,
         env=env,
         learning_rate=learning_rate,
         n_steps=n_steps,

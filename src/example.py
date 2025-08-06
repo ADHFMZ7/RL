@@ -64,6 +64,7 @@ def main():
             "normalize_images": False,
             "features_extractor_class": FlattenExtractor,
         },
+        'batch_size': 8 * 2048
     }
 
     # params = {
