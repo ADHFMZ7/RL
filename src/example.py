@@ -14,7 +14,6 @@ def main():
     url = os.environ['MLFLOW_TRACKING_URI']
 
     env = make_stacked_cartpole(n_envs = 8, num_frames = 6)
-
     # params = {
     #     "learning_rate" : 3e-4 ,
     #     "gamma" : 0.95,
@@ -69,7 +68,7 @@ def main():
 
     params = {
         'learning_rate': 0.000328323884080817,
-        'n_steps': 128,
+        'n_steps': 2048,
         'gamma': 0.9636242163718899,
         'gae_lambda': 0.888288034714926,
         'ent_coef': 0.020963306906827742,
@@ -118,12 +117,12 @@ def main():
     # }
 
     # del params["num_stacked"]
-    model = RecurrentPPO(MlpLstmPolicy, env, verbose=1, **params)
+    model = RecurrentPPO(
+        MlpLstmPolicy, env, verbose=1, **params
+    )
     # model = PPO("MlpPolicy", env, verbose=1, **params)
 
-
     new_run = Run(env, model, params, url, "test")
-
 
 if __name__ == "__main__":
     main()
