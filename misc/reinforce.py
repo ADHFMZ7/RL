@@ -119,6 +119,10 @@ class PolicyNetwork(nn.Module):
         return self.net(x)
 
 
+class ValueNetwork(nn.Module):
+    pass
+
+
 if __name__ == "__main__":
     env = gym.make("CartPole-v1")
 
