@@ -23,3 +23,4 @@ def make_stacked_cartpole(n_envs=1, num_frames=4):
     vec_env = make_vec_env(env_fn, n_envs=n_envs)
     stacked_env = VecFrameStack(vec_env, n_stack=num_frames)
     return stacked_env
+
