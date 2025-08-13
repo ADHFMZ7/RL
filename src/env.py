@@ -1,3 +1,5 @@
+import cartpole
+
 import numpy as np
 import gymnasium as gym
 from gymnasium.spaces import Box
@@ -9,7 +11,7 @@ from stable_baselines3.common.monitor import Monitor
 
 def create_pruned_cartpole():
     
-    base_env = gym.make("CartPole-v1" )
+    base_env = gym.make("custom_cartpole" )
 
     low = np.array([base_env.observation_space.low[0], base_env.observation_space.low[1]])
     high = np.array([base_env.observation_space.high[0], base_env.observation_space.high[1]])
