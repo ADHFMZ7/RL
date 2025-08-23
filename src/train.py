@@ -1,20 +1,20 @@
-
 import os
 import torch
 from stable_baselines3.common.torch_layers import FlattenExtractor
+
 # from stable_baselines3 import PPO
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.ppo_recurrent.policies import MlpLstmPolicy
 
 from run import Run
 from env import create_pruned_cartpole, make_stacked_cartpole
+import cartpole
+
+import gymnasium as gym
 
 
 def main():
-
-    url = os.environ['MLFLOW_TRACKING_URI']
-
-    env = make_stacked_cartpole(n_envs = 8, num_frames = 6)
+    url = os.environ["MLFLOW_TRACKING_URI"]
 
     params = {
         "learning_rate": 3e-4,
@@ -33,18 +33,20 @@ def main():
         "sde_sample_freq": -1,
         "target_kl": None,
         "policy_kwargs": None,
-        "seed": None,
-        "device": "auto"
+        "seed": 42,
+        "device": "auto",
     }
 
     # del params["num_stacked"]
-    model = RecurrentPPO(
-        MlpLstmPolicy, env, verbose=1, **params
-    )
-    # model = PPO("MlpPolicy", env, verbose=1, **params)
 
-    new_run = Run(env, model, params, url, "test")
+    # env_func = lambda: make_stacked_cartpole(n_envs=8, num_frames=1)
+    # model = PPO("MlpPolicy", env, verbose=1, **params)
+    env_func = lambda: gym.make("custom_cartpole")
+    policy = MlpLstmPolicy
+    # policy = "MlpPolicy"
+
+    new_run = Run(env_func, policy, params, url, "custom_baseline", 300_000)
+
 
 if __name__ == "__main__":
     main()
-

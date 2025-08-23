@@ -9,6 +9,8 @@ from stable_baselines3.common.logger import HumanOutputFormat, Logger
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3 import PPO
+from sb3_contrib import RecurrentPPO
 
 from log import MLflowOutputFormat
 from env import make_stacked_cartpole
@@ -16,19 +18,29 @@ from env import make_stacked_cartpole
 
 class Run:
     def __init__(
-        self, env, model: BaseAlgorithm, params: dict, url: str, exp_name: str
+        self,
+        env_func,
+        policy,
+        params: dict,
+        url: str,
+        exp_name: str,
+        timesteps: int = 30000,
     ):
         self.loggers = Logger(
             folder=None,
             output_formats=[HumanOutputFormat(sys.stdout), MLflowOutputFormat()],
         )
 
-        self.env = env
+        self.env = env_func()
 
         self.params = params
-        self.model = model
 
-        if model.device.type == "cuda":
+        if isinstance(policy, str):
+            self.model = PPO(policy, self.env, verbose=1, **params)
+        else:
+            self.model = RecurrentPPO(policy, self.env, verbose=1, **params)
+
+        if self.model.device.type == "cuda":
             torch.set_float32_matmul_precision("high")
 
         mlflow.set_experiment(exp_name)
@@ -46,17 +58,18 @@ class Run:
             experiment_id = experiment.experiment_id
 
         with mlflow.start_run(experiment_id=experiment_id):
+            params["policy"] = policy
             mlflow.log_params(params)
 
             # Set custom logger
-            model.set_logger(self.loggers)
-            model.learn(total_timesteps=300_000, log_interval=1)
+            self.model.set_logger(self.loggers)
+            self.model.learn(total_timesteps=timesteps, log_interval=1)
 
             # Evaluate the model after training
-            eval_env = make_stacked_cartpole(n_envs=8, num_frames=6)
+            eval_env = env_func()
             mean_reward, std_reward = evaluate_policy(
-                model,
-                env,
+                self.model,
+                self.env,
                 n_eval_episodes=10,
                 return_episode_rewards=False,
                 deterministic=True,
@@ -66,5 +79,5 @@ class Run:
             mlflow.log_metric("mean_reward", mean_reward)
             mlflow.log_metric("std_reward", std_reward)
 
-            model.save("model.zip")
+            self.model.save("model.zip")
             mlflow.log_artifact("model.zip")
